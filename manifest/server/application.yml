@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: recruitment-tracker-api
+  namespace: argocd
+spec:
+  project: recruitment-tracker
+  source:
+    repoURL: https://github.com/itgauy/manifest-yan.git
+    targetRevision: main
+    path: manifest/server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: recruitment-tracker-api
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
