@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: argocd
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOnsidXNlcm5hbWUiOiJ6ZW4waHViIiwicGFzc3dvcmQiOiJtM2QxYW0zdGVyIiwiZW1haWwiOiJhZG1pbkBtZWRpYS1tZXRlciIsImF1dGgiOiJlbVZ1TUdoMVlqcHRNMlF4WVcwemRHVnkifX19
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: recruitment-tracker-client
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOnsidXNlcm5hbWUiOiJ6ZW4waHViIiwicGFzc3dvcmQiOiJtM2QxYW0zdGVyIiwiZW1haWwiOiJhZG1pbkBtZWRpYS1tZXRlciIsImF1dGgiOiJlbVZ1TUdoMVlqcHRNMlF4WVcwemRHVnkifX19

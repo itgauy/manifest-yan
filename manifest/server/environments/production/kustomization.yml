@@ -1,0 +1,95 @@
+resources:
+  - ../../../../global/base/deploy
+  - ../../../../global/base/service
+  # - ../../global/base/ingress
+  # - ../../global/base/cert
+
+nameSuffix: -production
+
+commonLabels:
+  app: recruitment-tracker-api
+  component: backend
+  # service: streamlit
+  environment: production
+
+namespace: recruitment-tracker-api
+
+images:
+  - name: base-image
+    newName: zen0hub/recruitment_tracker_api
+    newTag: v0.0.0
+
+configMapGenerator:
+  - name: recruitment-tracker-api-cm
+    env: config.properties
+
+# secretGenerator:
+#   - name: recruitment-tracker-api-secret
+#     env: secret.properties
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: base-deploy
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: recruitment-tracker-api
+      - op: add
+        path: /spec/replicas
+        value: 3
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 8000
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+        value: recruitment-tracker-api-cm-production
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
+        value: recruitment-tracker-api-secret-production
+      - op: replace
+        path: /spec/template/metadata/labels
+        value:
+          app: recruitment-tracker-api
+          component: backend
+          environment: production
+      - op: replace
+        path: /spec/template/spec/tolerations
+        value:
+          - key: "proj"
+            operator: "Equal"
+            value: "scoup"
+            effect: "NoSchedule"
+      - op: remove
+        path: /spec/template/spec/imagePullSecrets
+
+  - target:
+      version: v1
+      kind: Service
+      name: base-svc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: recruitment-tracker-api-svc
+      - op: replace
+        path: /spec/ports
+        value:
+          - name: http
+            protocol: TCP
+            port: 8000
+            targetPort: 8000
+            nodePort: 30080
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/selector
+        value:
+          app: recruitment-tracker-api
+          component: backend
+          environment: production

@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: recruitment-tracker
+  namespace: argocd
+spec:
+  destinations:
+    - namespace: recruitment-tracker-api
+      server: https://kubernetes.default.svc
+    - namespace: "*"
+      server: "*"
+  sourceRepos:
+    - "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

@@ -1,0 +1,104 @@
+resources:
+  - ../../../../global/base/deploy
+  - ../../../../global/base/service
+  # - ../../global/base/ingress
+  # - ../../global/base/cert
+
+nameSuffix: -production
+
+commonLabels:
+  app: recruitment-tracker-client
+  component: backend
+  # service: streamlit
+  environment: production
+
+namespace: recruitment-tracker-client
+
+images:
+  - name: base-image
+    newName: zen0hub/recruitment_tracker_poc
+    newTag: v0.0.0
+
+configMapGenerator:
+  - name: recruitment-tracker-client-cm
+    env: config.properties
+
+# secretGenerator:
+#   - name: recruitment-tracker-client-secret-production
+#     literals:
+secretGenerator:
+  - name: recruitment-tracker-client-secret
+    literals:
+      - APP_ENV=production
+      - APP_SECRET=dummy
+
+# secretGenerator:
+#   - name: recruitment-tracker-client-secret
+#     env: secret.properties
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: base-deploy
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: recruitment-tracker-client
+      - op: add
+        path: /spec/replicas
+        value: 3
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 8501
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+        value: recruitment-tracker-client-cm-production
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
+        value: recruitment-tracker-client-secret-production
+      - op: replace
+        path: /spec/template/metadata/labels
+        value:
+          app: recruitment-tracker-client
+          component: backend
+          environment: production
+      - op: replace
+        path: /spec/template/spec/tolerations
+        value:
+          - key: "proj"
+            operator: "Equal"
+            value: "scoup"
+            effect: "NoSchedule"
+      - op: remove
+        path: /spec/template/spec/imagePullSecrets
+
+  - target:
+      version: v1
+      kind: Service
+      name: base-svc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: recruitment-tracker-client-svc
+      - op: replace
+        path: /spec/ports
+        value:
+          - name: http
+            protocol: TCP
+            port: 8501
+            targetPort: 8501
+            nodePort: 30082
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/selector
+        value:
+          app: recruitment-tracker-client
+          component: backend
+          environment: production
